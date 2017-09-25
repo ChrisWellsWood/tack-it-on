@@ -1,5 +1,9 @@
+extern crate glob;
+
 use std::error::Error;
 use std::process;
+
+use glob::glob;
 
 pub fn run(config: Config) -> Result<(), Box<Error>> {
     match config.mode {
@@ -11,6 +15,12 @@ pub fn run(config: Config) -> Result<(), Box<Error>> {
 
 fn run_init() {
     println!("Tacking notes onto this directory...");
+    for entry in glob("*").expect("Failed to read glob pattern.") {
+        match entry {
+            Ok(path) => println!("{:?}, is file {}", path.display(), path.is_file()),
+            Err(e) => println!("{:?}", e),
+        }
+    }
 }
 
 #[derive(Debug)]

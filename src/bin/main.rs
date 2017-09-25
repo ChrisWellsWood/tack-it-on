@@ -1,6 +1,5 @@
 extern crate tack_it_on;
 
-use std::error::Error;
 use std::env;
 use std::process;
 
