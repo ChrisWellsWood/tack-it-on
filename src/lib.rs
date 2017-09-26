@@ -1,3 +1,5 @@
+//! Core functionality of `tack-it-on`, a project centric note taking app.
+
 extern crate glob;
 
 use std::error::Error;
