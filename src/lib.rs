@@ -11,6 +11,11 @@ pub fn run(config: Config) -> Result<(), Box<Error>> {
     }
 }
 
+/// Initialises tack-it-on in the current directory.
+/// 
+/// If a `.tacked` directory is found in a parent directory, the user will be
+/// asked if they wish to uses that directory to store notes or create a new
+/// one.
 fn run_init() -> Result<(), Box<Error>> {
     let cwd = Path::new(".").canonicalize()?;
     println!("Tacking notes onto {:?}...", cwd);
@@ -22,6 +27,7 @@ fn run_init() -> Result<(), Box<Error>> {
     Ok(())
 }
 
+/// Crawls up file tree to root looking for a `.tacked` directory.
 fn find_tacked_notes(dir: PathBuf) -> Result<Option<PathBuf>, Box<Error>> {
     let path_chain = paths_from_crawl(dir);
     for path in path_chain.iter() {
@@ -34,6 +40,10 @@ fn find_tacked_notes(dir: PathBuf) -> Result<Option<PathBuf>, Box<Error>> {
     Ok(None)
 }
 
+/// Creates a `Vec` of all parent directories.
+///
+/// The vector of directories will be returned with the uppermost directory
+/// first and the root directory last.
 fn paths_from_crawl(dir: PathBuf) -> Vec<PathBuf> {
     let mut comp_path = PathBuf::new();
     let mut path_chain: Vec<PathBuf> = Vec::new();
@@ -46,6 +56,7 @@ fn paths_from_crawl(dir: PathBuf) -> Vec<PathBuf> {
     path_chain
 }
 
+/// Returns `true` if the supplied directory contains `.tacked/`.
 fn contains_notes(dir: &PathBuf) -> bool {
     let glob_str = format!("{}/*", dir.to_str().unwrap());
     for entry in glob(&glob_str).expect("Failed to read glob pattern.") {
@@ -59,6 +70,7 @@ fn contains_notes(dir: &PathBuf) -> bool {
     false
 }
 
+/// Contains processed arguments for running `tack-it-on`.
 #[derive(Debug)]
 pub struct Config {
     mode: Mode,
@@ -75,12 +87,14 @@ impl Config {
     }
 }
 
+/// Available modes for running `tack-it-on`.
 #[derive(Debug)]
 enum Mode {
     Init,
 }
 
 impl Mode {
+    /// Given a `&str` into a Result containing a Mode enum or an error.
     fn string_to_mode(mode_string: &str) -> Result<Mode, String> {
         match mode_string {
             "init" => Ok(Mode::Init),
