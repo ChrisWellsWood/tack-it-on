@@ -4,5 +4,7 @@ version = "0.1.0"
 authors = ["Chris Wells Wood <cwwoodesq@gmail.com>"]
 
 [dependencies]
+clap = "2"
 glob = "0.2.11"
+serde_json = "1.0"
 text_io = "0.1.6"
