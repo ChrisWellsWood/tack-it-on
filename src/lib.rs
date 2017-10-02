@@ -1,8 +1,12 @@
 //! Core functionality of `tack-it-on`, a project centric note taking app.
 
 #[macro_use] extern crate clap;
-extern crate glob;
+#[macro_use] extern crate serde_derive;
 #[macro_use] extern crate text_io;
+
+extern crate glob;
+extern crate serde;
+extern crate serde_json;
 
 use std::error::Error;
 
@@ -16,6 +20,11 @@ pub fn run() -> Result<(), Box<Error>> {
         (about: "A project centric note-taking application.")
         (@subcommand init =>
             (about: "Initialises a tacked on notes directory.")
+        )
+        (@subcommand note =>
+            (about: "Creates a new note.")
+			(@arg CONTENT: +required "Note content, wrapped in \"\".")
+			(@arg on: --on +takes_value "Tack note onto file.")
         )
     ).get_matches();
 
