@@ -29,7 +29,7 @@ pub fn run_init() -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn find_tacked_notes(dir: &PathBuf) -> Result<Option<PathBuf>, Box<Error>> {
+pub fn find_tacked_notes(dir: &PathBuf) -> Result<Option<PathBuf>, Box<Error>> {
     let path_chain = paths_from_crawl(dir);
     for path in path_chain.iter() {
         let found_notes = contains_notes(path);
