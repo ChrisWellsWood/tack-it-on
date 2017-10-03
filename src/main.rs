@@ -4,8 +4,6 @@
 
 extern crate tack_it_on;
 
-use std::env;
-
 fn main() {
     if let Err(e) = tack_it_on::run(){
         eprintln!("Error:\n{}", e);
