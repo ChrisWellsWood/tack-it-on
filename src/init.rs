@@ -33,8 +33,8 @@ pub fn find_tacked_notes(dir: &PathBuf) -> Result<Option<PathBuf>, Box<Error>> {
     let path_chain = paths_from_crawl(dir);
     for path in path_chain.iter() {
         let found_notes = contains_notes(path);
-        if found_notes {
-            return Ok(Some(path.clone()));
+        if found_notes.is_some() {
+            return Ok(found_notes);
         }
     }
 
@@ -58,17 +58,17 @@ fn paths_from_crawl(dir: &PathBuf) -> Vec<PathBuf> {
 }
 
 /// Returns `true` if the supplied directory contains `.tacked/`.
-fn contains_notes(dir: &PathBuf) -> bool {
+fn contains_notes(dir: &PathBuf) -> Option<PathBuf> {
     let glob_str = format!("{}/*", dir.to_str().unwrap());
     for entry in glob(&glob_str).expect("Failed to read glob pattern.") {
         if let Ok(path) = entry {
            if path.ends_with(".tacked") {
-               return true;
+               return Some(path);
            }
         }
     }
 
-    false
+    None
 }
 
 /// Queries if initialisation of project should continue.

@@ -10,10 +10,10 @@ use serde_json;
 use init::find_tacked_notes;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Note {
-    content: String,
-    on: Option<String>,
-    datetime: chrono::DateTime<chrono::Local>,
+pub struct Note {
+    pub content: String,
+    pub on: Option<String>,
+    pub datetime: chrono::DateTime<chrono::Local>,
 }
 
 pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -29,10 +29,7 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 
 fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
                -> Result<(), Box<Error>> {
-    let mut notes_path = tacked_dir.clone();
-    notes_path.push(".tacked");
-    notes_path.push("notes.json");
-    let mut notes = get_notes(&notes_path)?;
+    let (notes_path, mut notes) = get_notes(&tacked_dir)?;
     let note = Note {
         content: String::from(input.value_of("CONTENT").unwrap()),
         on: input.value_of("on").map(|s| String::from(s)),
@@ -49,10 +46,12 @@ fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
     Ok(())
 }
 
-fn get_notes(notes_path: &PathBuf) -> Result<Vec<Note>, Box<Error>> {
+pub fn get_notes(tacked_dir: &PathBuf) -> Result<(PathBuf, Vec<Note>), Box<Error>> {
     let notes: Vec<Note>;
+    let mut notes_path = tacked_dir.clone();
+    notes_path.push("notes.json");
     if notes_path.exists() {
-        let mut notes_file = File::open(notes_path)?;
+        let mut notes_file = File::open(&notes_path)?;
         let mut notes_string = String::new();
         notes_file.read_to_string(&mut notes_string)?;
         notes = serde_json::from_str(&notes_string)?;
@@ -60,7 +59,7 @@ fn get_notes(notes_path: &PathBuf) -> Result<Vec<Note>, Box<Error>> {
         notes = Vec::new();
     }
 
-    Ok(notes)
+    Ok((notes_path, notes))
 }
 
 
