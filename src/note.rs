@@ -3,6 +3,7 @@ use std::io::{Read, Write};
 use std::fs::{File, OpenOptions};
 use std::path::{Path, PathBuf};
 
+use chrono;
 use clap;
 use serde_json;
 
@@ -12,6 +13,7 @@ use init::find_tacked_notes;
 struct Note {
     content: String,
     on: Option<String>,
+    datetime: chrono::DateTime<chrono::Local>,
 }
 
 pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -34,10 +36,10 @@ fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
     let note = Note {
         content: String::from(input.value_of("CONTENT").unwrap()),
         on: input.value_of("on").map(|s| String::from(s)),
+        datetime: chrono::Local::now(),
         };
     notes.push(note);
     let notes_json = serde_json::to_string(&notes)?;
-    println!("{:?}", notes_json);
     let mut buffer = OpenOptions::new()
                       .write(true)
                       .create(true)
@@ -60,3 +62,5 @@ fn get_notes(notes_path: &PathBuf) -> Result<Vec<Note>, Box<Error>> {
 
     Ok(notes)
 }
+
+

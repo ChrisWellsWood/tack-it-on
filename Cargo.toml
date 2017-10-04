@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Chris Wells Wood <cwwoodesq@gmail.com>"]
 
 [dependencies]
+chrono = { version = "0.4", features = ["serde"] }
 clap = "2"
 glob = "0.2.11"
 serde = "1.0"
