@@ -16,7 +16,8 @@ pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
                 println!("[{}] {}\nOn {}: {}\n", &note.gen_id()[..8], note.datetime,
                          on_file.display(), note.content);
             } else {
-                println!("{}\n{}\n", note.datetime, note.content);
+                println!("[{}] {}\n{}\n", &note.gen_id()[..8], note.datetime,
+                         note.content);
             }
         }
     } else { 

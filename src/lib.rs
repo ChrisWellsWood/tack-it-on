@@ -35,7 +35,7 @@ pub fn run() -> Result<(), Box<Error>> {
         )
         (@subcommand rm =>
             (about: "Remove note.")
-			(@arg id: --id +takes_value "Removes note with matching ID.")
+			(@arg id: -i --id +takes_value "Removes note with matching ID.")
         )
     ).get_matches();
 
