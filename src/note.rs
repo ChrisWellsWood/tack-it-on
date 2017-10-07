@@ -48,14 +48,8 @@ fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
         on: on_path_maybe,
         datetime: chrono::Local::now(),
         };
-    println!("{}", note.gen_id());
     notes.push(note);
-    let notes_json = serde_json::to_string(&notes)?;
-    let mut buffer = OpenOptions::new()
-                      .write(true)
-                      .create(true)
-                      .open(notes_path)?;
-    buffer.write(&notes_json.into_bytes())?;
+    save_notes(&notes, &notes_path)?;
 
     Ok(())
 }
@@ -107,4 +101,15 @@ pub fn get_notes(tacked_dir: &PathBuf) -> Result<(PathBuf, Vec<Note>), Box<Error
     Ok((notes_path, notes))
 }
 
+pub fn save_notes(notes: &Vec<Note>, notes_path: &PathBuf)
+                  -> Result<(), Box<Error>> {
+    let notes_json = serde_json::to_string(notes)?;
+    let mut buffer = OpenOptions::new()
+                      .write(true)
+                      .truncate(true)
+                      .create(true)
+                      .open(notes_path)?;
+    buffer.write(&notes_json.into_bytes())?;
 
+    Ok(())
+}

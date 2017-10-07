@@ -14,6 +14,7 @@ use std::error::Error;
 mod init;
 mod note;
 mod show;
+mod rm;
 
 pub fn run() -> Result<(), Box<Error>> {
 	let cli_app = clap_app!(myapp =>
@@ -32,12 +33,17 @@ pub fn run() -> Result<(), Box<Error>> {
             (about: "Show note.")
 			(@arg on: --on +takes_value "Show notes on file.")
         )
+        (@subcommand rm =>
+            (about: "Remove note.")
+			(@arg id: --id +takes_value "Removes note with matching ID.")
+        )
     ).get_matches();
 
     match cli_app.subcommand() {
         ("init", _) => init::run_init(),
         ("note", Some(sub_args)) => note::run_note(sub_args),
         ("show", Some(sub_args)) => show::run_show(sub_args),
+        ("rm", Some(sub_args)) => rm::run_rm(sub_args),
 		_ => Err(From::from(cli_app.usage())),
     }
 }
