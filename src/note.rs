@@ -1,4 +1,6 @@
+use std::collections::hash_map::DefaultHasher;
 use std::error::Error;
+use std::hash::{Hash, Hasher};
 use std::io::{Read, Write};
 use std::fs::{File, OpenOptions};
 use std::path::{Path, PathBuf};
@@ -9,11 +11,20 @@ use serde_json;
 
 use init::find_tacked_notes;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Hash, Serialize, Deserialize)]
 pub struct Note {
     pub content: String,
-    pub on: Option<String>,
+    pub on: Option<PathBuf>,
     pub datetime: chrono::DateTime<chrono::Local>,
+}
+
+impl Note {
+    pub fn gen_id(&self) -> String {
+        let mut h = DefaultHasher::new();
+        self.hash(&mut h);
+
+        h.finish().to_string()
+    }
 }
 
 pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -23,18 +34,21 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     if let Some(mut tacked_dir) = maybe_tacked {
         create_note(input, &mut tacked_dir)
     } else { 
-        Err(From::from("No `.tacked` directory found. Run `init` before adding notes."))
+        Err(From::from(
+                "No `.tacked` directory found. Run `init` before adding notes."))
     }
 }
 
 fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
                -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
+    let on_path_maybe = short_on_path(input, tacked_dir)?;
     let note = Note {
         content: String::from(input.value_of("CONTENT").unwrap()),
-        on: input.value_of("on").map(|s| String::from(s)),
+        on: on_path_maybe,
         datetime: chrono::Local::now(),
         };
+    println!("{}", note.gen_id());
     notes.push(note);
     let notes_json = serde_json::to_string(&notes)?;
     let mut buffer = OpenOptions::new()
@@ -44,6 +58,37 @@ fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
     buffer.write(&notes_json.into_bytes())?;
 
     Ok(())
+}
+
+fn short_on_path(input: &clap::ArgMatches, tacked_dir: &PathBuf)
+                 -> Result<Option<PathBuf>, Box<Error>> {
+    let mut on_path_maybe = None;
+    if let Some(on_string) = input.value_of("on") {
+        let on_path = Path::new(on_string)
+            .canonicalize()
+            .expect(&format!("Could not find '{}'.", on_string));
+        let tacked_parent = tacked_dir
+            .parent()
+            .expect("`.tacked` has no parent dir.");
+        let mut path_after_tacked = PathBuf::new();
+        let mut post_tacked = false;
+        for component in on_path.components() {
+            if post_tacked {
+                path_after_tacked.push(component.as_ref());
+            }
+            if tacked_parent.ends_with(component.as_ref()) {
+                post_tacked = true;
+            }
+        }
+        if !post_tacked {
+            return Err(From::from(
+                           format!("{} is outside of the tack-it-on project.",
+                                   on_path.display())));
+        }
+        on_path_maybe = Some(path_after_tacked);
+    }
+
+    Ok(on_path_maybe)
 }
 
 pub fn get_notes(tacked_dir: &PathBuf) -> Result<(PathBuf, Vec<Note>), Box<Error>> {
