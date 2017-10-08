@@ -47,7 +47,7 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 }
 
 /// Creates and stores a new note.
-fn create_note(content: String, maybe_on: Option<&str>, tacked_dir: &PathBuf)
+pub fn create_note(content: String, maybe_on: Option<&str>, tacked_dir: &PathBuf)
                -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
     let maybe_short_on = short_on_path(maybe_on, tacked_dir)?;
@@ -125,6 +125,7 @@ pub fn save_notes(notes: &Vec<Note>, notes_path: &PathBuf)
     Ok(())
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
     use std::fs;
@@ -138,7 +139,7 @@ mod tests {
         fs::create_dir(tacked_path.clone()).unwrap();
         let content = String::from("This is a test note.");
         let maybe_on = None;
-        create_note(content.clone(), maybe_on, &tacked_path);
+        create_note(content.clone(), maybe_on, &tacked_path).unwrap();
         let json_path = tacked_path.join("notes.json");
         assert!(json_path.exists());
         let (notes_path, mut notes) = get_notes(&tacked_path).unwrap();

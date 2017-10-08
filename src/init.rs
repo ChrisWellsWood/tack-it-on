@@ -109,6 +109,7 @@ fn create_tacked(cwd: &PathBuf) -> Result<(), std::io::Error> {
     fs::create_dir(tacked_path)
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
     use tempdir::TempDir;
@@ -117,7 +118,7 @@ mod tests {
     fn initialize_tackiton() {
         let temp_dir = TempDir::new("init_test")
             .expect("Could not create temp directory.");
-        let create_result = create_tacked(&temp_dir.path().to_owned()).unwrap();
+        create_tacked(&temp_dir.path().to_owned()).unwrap();
         let tacked_path = temp_dir.path().join(".tacked");
         assert!(tacked_path.exists());
     }
