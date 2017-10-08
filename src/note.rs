@@ -125,16 +125,25 @@ pub fn save_notes(notes: &Vec<Note>, notes_path: &PathBuf)
     Ok(())
 }
 
-// mod tests {
-//     use super::*;
-//     use tempdir::TempDir;
-// 
-//     #[test]
-//     fn initialize_tackiton() {
-//         let temp_dir = TempDir::new("init_test")
-//             .expect("Could not create temp directory.");
-//         let create_result = create_tacked(&temp_dir.path().to_owned()).unwrap();
-//         let tacked_path = temp_dir.path().join(".tacked");
-//         assert!(tacked_path.exists());
-//     }
-// }
+mod tests {
+    use super::*;
+    use std::fs;
+    use tempdir::TempDir;
+
+    #[test]
+    fn create_and_get_note() {
+        let temp_dir = TempDir::new("create_test")
+            .expect("Could not create temp directory.");
+        let tacked_path = temp_dir.path().join(".tacked");
+        fs::create_dir(tacked_path.clone()).unwrap();
+        let content = String::from("This is a test note.");
+        let maybe_on = None;
+        create_note(content.clone(), maybe_on, &tacked_path);
+        let json_path = tacked_path.join("notes.json");
+        assert!(json_path.exists());
+        let (notes_path, mut notes) = get_notes(&tacked_path).unwrap();
+        assert_eq!(notes_path, json_path);
+        let note = notes.pop().unwrap();
+        assert_eq!(note.content, content);
+    }
+}
