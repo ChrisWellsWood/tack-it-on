@@ -1,3 +1,5 @@
+//! This module contains functions for showing notes.
+
 use std::error::Error;
 use std::path::Path;
 
@@ -6,6 +8,7 @@ use clap;
 use init::find_tacked_notes;
 use note::get_notes;
 
+/// Main entry point for the `show` subcommand.
 pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let cwd = Path::new(".").canonicalize()?;
     let maybe_tacked = find_tacked_notes(&cwd)?;
