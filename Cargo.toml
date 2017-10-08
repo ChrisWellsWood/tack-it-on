@@ -2,6 +2,15 @@
 name = "tack-it-on"
 version = "1.0.0"
 authors = ["Chris Wells Wood <cwwoodesq@gmail.com>"]
+description = "..."
+# documentation = "..."
+# homepage = "..."
+repository = "..."
+readme = "README.md"
+keywords = ["notes", "app", "bin", "organisation", "projects", "planning",
+            "todo"] 
+categories = ["productivity"]
+license = "MIT"
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
