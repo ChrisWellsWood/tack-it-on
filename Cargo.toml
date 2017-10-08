@@ -1,6 +1,6 @@
 [package]
 name = "tack-it-on"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Chris Wells Wood <cwwoodesq@gmail.com>"]
 description = "..."
 # documentation = "..."
@@ -8,7 +8,7 @@ description = "..."
 repository = "https://github.com/ChrisWellsWood/tack-it-on"
 readme = "README.md"
 keywords = ["notes", "organisation", "projects", "planning", "todo"] 
-categories = ["productivity"]
+categories = ["command-line-utilities"]
 license = "MIT"
 
 [dependencies]
