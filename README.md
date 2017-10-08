@@ -1,5 +1,10 @@
 # tack-it-on
 ### Tack notes onto your project files and directories!
+
+[![Latest Version]][crates.io]
+
+[Latest Version]: https://img.shields.io/crates/v/tack-it-on.svg
+[creates.io]: https://crates.io/crates/tack-it-on
 ## Overview
 
 Ever been working on a project and wanted to write a quick note about something
