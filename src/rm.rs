@@ -46,3 +46,27 @@ fn remove_note(id: &str, tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use note::create_note;
+    use std::fs;
+    use tempdir::TempDir;
+
+    #[test]
+    fn rm_note() {
+        let temp_dir = TempDir::new("rm_test")
+            .expect("Could not create temp directory.");
+        let tacked_path = temp_dir.path().join(".tacked");
+        fs::create_dir(tacked_path.clone()).unwrap();
+        let content = String::from("This is a test note.");
+        let maybe_on = None;
+        create_note(content.clone(), maybe_on, &tacked_path).unwrap();
+        let (notes_path, mut notes) = get_notes(&tacked_path).unwrap();
+        let note = notes.pop().unwrap();
+        remove_note(&note.gen_id(), &tacked_path).unwrap();
+        let (_, mut notes) = get_notes(&tacked_path).unwrap();
+        assert_eq!(notes.len(), 0);
+    }
+}
