@@ -1,3 +1,5 @@
+//! This module contains functionality for removing notes.
+
 use std::error::Error;
 use std::path::{Path, PathBuf};
 
@@ -6,6 +8,7 @@ use clap;
 use init::find_tacked_notes;
 use note::{get_notes, save_notes};
 
+/// Main entry point to the `rm` subcommand.
 pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let cwd = Path::new(".").canonicalize()?;
     let maybe_tacked = find_tacked_notes(&cwd)?;
@@ -21,6 +24,7 @@ pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     Ok(())
 }
 
+/// Removes a note given a partial ID.
 fn remove_note(id: &str, tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
     let mut matching_ids: Vec<usize> = notes
