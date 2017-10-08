@@ -5,7 +5,7 @@ authors = ["Chris Wells Wood <cwwoodesq@gmail.com>"]
 description = "..."
 # documentation = "..."
 # homepage = "..."
-repository = "..."
+repository = "https://github.com/ChrisWellsWood/tack-it-on"
 readme = "README.md"
 keywords = ["notes", "app", "bin", "organisation", "projects", "planning",
             "todo"] 
