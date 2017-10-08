@@ -8,6 +8,7 @@ extern crate chrono;
 extern crate glob;
 extern crate serde;
 extern crate serde_json;
+extern crate tempdir;
 
 use std::error::Error;
 
@@ -16,6 +17,7 @@ mod note;
 mod show;
 mod rm;
 
+/// Processes arguments and runs subcommands.
 pub fn run() -> Result<(), Box<Error>> {
 	let cli_app = clap_app!(myapp =>
         (version: "0.1.0")
@@ -45,12 +47,5 @@ pub fn run() -> Result<(), Box<Error>> {
         ("show", Some(sub_args)) => show::run_show(sub_args),
         ("rm", Some(sub_args)) => rm::run_rm(sub_args),
 		_ => Err(From::from(cli_app.usage())),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
     }
 }

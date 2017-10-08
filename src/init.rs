@@ -1,3 +1,6 @@
+//! This module contains functions for initialising a `tack-it-on`
+//! directory.
+
 use std;
 use std::error::Error;
 use std::fs;
@@ -57,7 +60,8 @@ fn paths_from_crawl(dir: &PathBuf) -> Vec<PathBuf> {
     path_chain
 }
 
-/// Returns `true` if the supplied directory contains `.tacked/`.
+/// If the directory contains a `.tacked` directory, Some(PathBuf) is returned
+/// containing the path to the `.tacked` directory.
 fn contains_notes(dir: &PathBuf) -> Option<PathBuf> {
     let glob_str = format!("{}/*", dir.to_str().unwrap());
     for entry in glob(&glob_str).expect("Failed to read glob pattern.") {
@@ -103,7 +107,54 @@ fn create_tacked(cwd: &PathBuf) -> Result<(), std::io::Error> {
 }
 
 mod tests {
+    use super::*;
+    use tempdir::TempDir;
+
     #[test]
-    fn it_works() {
+    fn initialize_tackiton() {
+        let temp_dir = TempDir::new("init_test")
+            .expect("Could not create temp directory.");
+        let create_result = create_tacked(&temp_dir.path().to_owned()).unwrap();
+        let tacked_path = temp_dir.path().join(".tacked");
+        assert!(tacked_path.exists());
+    }
+
+    #[test]
+    fn check_dir_for_tacked() {
+        let temp_dir = TempDir::new("check_test")
+            .expect("Could not create temp directory.");
+        let tacked_path = temp_dir.path().join(".tacked");
+        fs::create_dir(tacked_path.clone()).unwrap();
+        assert!(contains_notes(&temp_dir.path().to_owned()).is_some());
+        let not_tacked_path = temp_dir.path().join("tacked");
+        fs::create_dir(not_tacked_path.clone()).unwrap();
+        assert!(!contains_notes(&not_tacked_path).is_some());
+    }
+
+    #[test]
+    fn find_tacked() {
+        let temp_dir = TempDir::new("find_tacked_test")
+            .expect("Could not create temp directory.");
+        let project_path = temp_dir.path().join("project");
+        fs::create_dir(project_path.clone()).unwrap();
+        let tacked_path = project_path.join(".tacked");
+        fs::create_dir(tacked_path.clone()).unwrap();
+        let deep_project_path = project_path
+            .join("level1")
+            .join("level2");
+        fs::create_dir_all(deep_project_path.clone()).unwrap();
+        let red_herring_path = temp_dir
+            .path()
+            .join("not_project")
+            .join("still_not_project");
+        fs::create_dir_all(red_herring_path.clone()).unwrap();
+        let tacked_maybe = find_tacked_notes(
+            &deep_project_path.to_owned()).unwrap();
+        assert!(tacked_maybe.is_some());
+        if let Some(tp) = tacked_maybe {
+            assert!(tp == tacked_path);
+        }
+        let rh_maybe = find_tacked_notes(&red_herring_path.to_owned()).unwrap();
+        assert!(rh_maybe.is_none());
     }
 }
