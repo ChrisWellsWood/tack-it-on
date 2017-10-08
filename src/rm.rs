@@ -66,7 +66,7 @@ mod tests {
         let (notes_path, mut notes) = get_notes(&tacked_path).unwrap();
         let note = notes.pop().unwrap();
         remove_note(&note.gen_id(), &tacked_path).unwrap();
-        let (_, mut notes) = get_notes(&tacked_path).unwrap();
+        let (_, notes) = get_notes(&tacked_path).unwrap();
         assert_eq!(notes.len(), 0);
     }
 }
