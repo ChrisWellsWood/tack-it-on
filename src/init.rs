@@ -32,6 +32,8 @@ pub fn run_init() -> Result<(), Box<Error>> {
     Ok(())
 }
 
+/// Finds a `.tacked` directory if one is in the path supplied or any of its parent
+/// directories.
 pub fn find_tacked_notes(dir: &PathBuf) -> Result<Option<PathBuf>, Box<Error>> {
     let path_chain = paths_from_crawl(dir);
     for path in path_chain.iter() {
@@ -99,6 +101,7 @@ fn query_init(cwd: &PathBuf, tacked_loc: &PathBuf) -> Result<bool, String> {
     Ok(opt_init.unwrap())
 }
 
+/// Creates a `.tacked` directory in the directory supplied.
 fn create_tacked(cwd: &PathBuf) -> Result<(), std::io::Error> {
     let mut tacked_path = cwd.clone();
     tacked_path.push(".tacked");
