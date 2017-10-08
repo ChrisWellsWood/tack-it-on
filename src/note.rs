@@ -37,7 +37,9 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let maybe_tacked = find_tacked_notes(&cwd)?;
 
     if let Some(mut tacked_dir) = maybe_tacked {
-        create_note(input, &mut tacked_dir)
+        let content = String::from(input.value_of("CONTENT").unwrap());
+        let maybe_on = input.value_of("on");
+        create_note(content, maybe_on, &mut tacked_dir)
     } else { 
         Err(From::from(
                 "No `.tacked` directory found. Run `init` before adding notes."))
@@ -45,13 +47,13 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 }
 
 /// Creates and stores a new note.
-fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
+fn create_note(content: String, maybe_on: Option<&str>, tacked_dir: &PathBuf)
                -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
-    let on_path_maybe = short_on_path(input, tacked_dir)?;
+    let maybe_short_on = short_on_path(maybe_on, tacked_dir)?;
     let note = Note {
-        content: String::from(input.value_of("CONTENT").unwrap()),
-        on: on_path_maybe,
+        content,
+        on: maybe_short_on,
         datetime: chrono::Local::now(),
         };
     notes.push(note);
@@ -60,11 +62,28 @@ fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
     Ok(())
 }
 
+/// Gets all notes from `notes.json` in the `.tacked` folder.
+pub fn get_notes(tacked_dir: &PathBuf) -> Result<(PathBuf, Vec<Note>), Box<Error>> {
+    let notes: Vec<Note>;
+    let mut notes_path = tacked_dir.clone();
+    notes_path.push("notes.json");
+    if notes_path.exists() {
+        let mut notes_file = File::open(&notes_path)?;
+        let mut notes_string = String::new();
+        notes_file.read_to_string(&mut notes_string)?;
+        notes = serde_json::from_str(&notes_string)?;
+    } else {
+        notes = Vec::new();
+    }
+
+    Ok((notes_path, notes))
+}
+
 /// Returns the `--on` flag target path, relative to the `.tacked` directory.
-fn short_on_path(input: &clap::ArgMatches, tacked_dir: &PathBuf)
+fn short_on_path(maybe_on: Option<&str>, tacked_dir: &PathBuf)
                  -> Result<Option<PathBuf>, Box<Error>> {
-    let mut on_path_maybe = None;
-    if let Some(on_string) = input.value_of("on") {
+    let mut maybe_short_on = None;
+    if let Some(on_string) = maybe_on {
         let on_path = Path::new(on_string)
             .canonicalize()
             .expect(&format!("Could not find '{}'.", on_string));
@@ -86,27 +105,10 @@ fn short_on_path(input: &clap::ArgMatches, tacked_dir: &PathBuf)
                            format!("{} is outside of the tack-it-on project.",
                                    on_path.display())));
         }
-        on_path_maybe = Some(path_after_tacked);
+        maybe_short_on  = Some(path_after_tacked);
     }
 
-    Ok(on_path_maybe)
-}
-
-/// Gets all notes from `notes.json` in the `.tacked` folder.
-pub fn get_notes(tacked_dir: &PathBuf) -> Result<(PathBuf, Vec<Note>), Box<Error>> {
-    let notes: Vec<Note>;
-    let mut notes_path = tacked_dir.clone();
-    notes_path.push("notes.json");
-    if notes_path.exists() {
-        let mut notes_file = File::open(&notes_path)?;
-        let mut notes_string = String::new();
-        notes_file.read_to_string(&mut notes_string)?;
-        notes = serde_json::from_str(&notes_string)?;
-    } else {
-        notes = Vec::new();
-    }
-
-    Ok((notes_path, notes))
+    Ok(maybe_short_on)
 }
 
 /// Writes an updated `notes.json` file to the `.tacked` directory.
@@ -122,3 +124,17 @@ pub fn save_notes(notes: &Vec<Note>, notes_path: &PathBuf)
 
     Ok(())
 }
+
+// mod tests {
+//     use super::*;
+//     use tempdir::TempDir;
+// 
+//     #[test]
+//     fn initialize_tackiton() {
+//         let temp_dir = TempDir::new("init_test")
+//             .expect("Could not create temp directory.");
+//         let create_result = create_tacked(&temp_dir.path().to_owned()).unwrap();
+//         let tacked_path = temp_dir.path().join(".tacked");
+//         assert!(tacked_path.exists());
+//     }
+// }
