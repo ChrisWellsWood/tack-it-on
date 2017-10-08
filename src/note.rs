@@ -1,3 +1,5 @@
+//! This module contains functions for creating and saving a new note.
+
 use std::collections::hash_map::DefaultHasher;
 use std::error::Error;
 use std::hash::{Hash, Hasher};
@@ -11,6 +13,7 @@ use serde_json;
 
 use init::find_tacked_notes;
 
+/// A `tack-it-on` note.
 #[derive(Debug, Hash, Serialize, Deserialize)]
 pub struct Note {
     pub content: String,
@@ -19,6 +22,7 @@ pub struct Note {
 }
 
 impl Note {
+    /// Creates an ID for a note by hashing the contents.
     pub fn gen_id(&self) -> String {
         let mut h = DefaultHasher::new();
         self.hash(&mut h);
@@ -27,6 +31,7 @@ impl Note {
     }
 }
 
+/// Main entry point to the `note` subcommand. Creates a new note.
 pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let cwd = Path::new(".").canonicalize()?;
     let maybe_tacked = find_tacked_notes(&cwd)?;
@@ -39,6 +44,7 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     }
 }
 
+/// Creates and stores a new note.
 fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
                -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
@@ -54,6 +60,7 @@ fn create_note(input: &clap::ArgMatches, tacked_dir: &PathBuf)
     Ok(())
 }
 
+/// Returns the `--on` flag target path, relative to the `.tacked` directory.
 fn short_on_path(input: &clap::ArgMatches, tacked_dir: &PathBuf)
                  -> Result<Option<PathBuf>, Box<Error>> {
     let mut on_path_maybe = None;
@@ -85,6 +92,7 @@ fn short_on_path(input: &clap::ArgMatches, tacked_dir: &PathBuf)
     Ok(on_path_maybe)
 }
 
+/// Gets all notes from `notes.json` in the `.tacked` folder.
 pub fn get_notes(tacked_dir: &PathBuf) -> Result<(PathBuf, Vec<Note>), Box<Error>> {
     let notes: Vec<Note>;
     let mut notes_path = tacked_dir.clone();
@@ -101,6 +109,7 @@ pub fn get_notes(tacked_dir: &PathBuf) -> Result<(PathBuf, Vec<Note>), Box<Error
     Ok((notes_path, notes))
 }
 
+/// Writes an updated `notes.json` file to the `.tacked` directory.
 pub fn save_notes(notes: &Vec<Note>, notes_path: &PathBuf)
                   -> Result<(), Box<Error>> {
     let notes_json = serde_json::to_string(notes)?;
