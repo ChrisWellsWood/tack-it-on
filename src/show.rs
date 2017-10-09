@@ -70,6 +70,6 @@ mod tests {
         let content = String::from("This is a test note.");
         let maybe_on = None;
         create_note(content.clone(), maybe_on, &tacked_path).unwrap();
-        show_notes(&tacked_path).unwrap();
+        show_notes(maybe_on, &tacked_path).unwrap();
     }
 }
