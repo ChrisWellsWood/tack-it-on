@@ -6,14 +6,15 @@ use std::path::{Path, PathBuf};
 use clap;
 
 use init::find_tacked_notes;
-use note::get_notes;
+use note::{Note, get_notes};
 
 /// Main entry point for the `show` subcommand.
 pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let cwd = Path::new(".").canonicalize()?;
     let maybe_tacked = find_tacked_notes(&cwd)?;
     if let Some(tacked_dir) = maybe_tacked {
-        show_notes(&tacked_dir)?;
+        let maybe_on = input.value_of("on");
+        show_notes(maybe_on, &tacked_dir)?;
     } else { 
         return Err(From::from(
             "No `.tacked` directory found. Run `init` before adding notes."));
@@ -23,9 +24,30 @@ pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 }
 
 /// Shows all notes.
-fn show_notes(tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
+fn show_notes(maybe_on: Option<&str>, tacked_dir: &PathBuf)
+              -> Result<(), Box<Error>> {
     let (_, notes) = get_notes(tacked_dir)?;
-    for note in notes.iter() {
+    let notes_to_print: Vec<Note>;
+    if let Some(on) = maybe_on {
+        let mut on = String::from(on);
+        if on.ends_with("/") {
+            on.pop();
+        }
+        notes_to_print = notes
+            .iter()
+            .filter(|s| {
+                if let Some(ref on_path) = s.on {
+                    on == on_path.to_str().expect("Could not convert path to str.")
+                } else {
+                    false
+                }
+            })
+            .cloned()
+            .collect();
+    } else {
+        notes_to_print = notes;
+    }
+    for note in notes_to_print {
         note.print_note();
     }
 

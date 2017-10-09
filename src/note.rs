@@ -14,7 +14,7 @@ use serde_json;
 use init::find_tacked_notes;
 
 /// A `tack-it-on` note.
-#[derive(Debug, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, Hash, Serialize, Deserialize)]
 pub struct Note {
     pub content: String,
     pub on: Option<PathBuf>,
