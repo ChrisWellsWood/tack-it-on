@@ -2,7 +2,7 @@
 name = "tack-it-on"
 version = "1.0.1"
 authors = ["Chris Wells Wood <cwwoodesq@gmail.com>"]
-description = "..."
+description = "Attach notes to project files and directories with tack-it-on!"
 # documentation = "..."
 # homepage = "..."
 repository = "https://github.com/ChrisWellsWood/tack-it-on"
