@@ -87,6 +87,7 @@ tack rm --id 2
 - [ ] Add user information to notes.
 - [ ] Add tagging system.
 - [ ] Global notes.
+- [ ] Add to do list.
 
 If you have any ideas for new features, please make an issue requesting it, or
 fork the repo, add it and make a pull request!
