@@ -26,13 +26,7 @@ pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 fn show_notes(tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
     let (_, notes) = get_notes(tacked_dir)?;
     for note in notes.iter() {
-        if let Some(ref on_file) = note.on {
-            println!("[{}] {}\nOn {}: {}\n", &note.gen_id()[..8], note.datetime,
-                     on_file.display(), note.content);
-        } else {
-            println!("[{}] {}\n{}\n", &note.gen_id()[..8], note.datetime,
-                     note.content);
-        }
+        note.print_note();
     }
 
     Ok(())

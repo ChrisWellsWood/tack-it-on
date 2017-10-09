@@ -29,6 +29,16 @@ impl Note {
 
         h.finish().to_string()
     }
+
+    pub fn print_note(&self) {
+        if let Some(ref on_file) = self.on {
+            println!("[{}] {}\nOn {}: {}\n", &self.gen_id()[..8], &self.datetime,
+                     on_file.display(), &self.content);
+        } else {
+            println!("[{}] {}\n{}\n", &self.gen_id()[..8], &self.datetime,
+                     &self.content);
+        }
+    }
 }
 
 /// Main entry point to the `note` subcommand. Creates a new note.
