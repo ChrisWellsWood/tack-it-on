@@ -7,6 +7,7 @@ use clap;
 
 use init::find_tacked_notes;
 use note::{get_notes, save_notes};
+use types::Tackable;
 
 /// Main entry point to the `rm` subcommand.
 pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {

@@ -16,6 +16,7 @@ mod init;
 mod note;
 mod show;
 mod rm;
+mod types;
 
 /// Processes arguments and runs subcommands.
 pub fn run() -> Result<(), Box<Error>> {

@@ -6,7 +6,8 @@ use std::path::{Path, PathBuf};
 use clap;
 
 use init::find_tacked_notes;
-use note::{Note, get_notes};
+use note::get_notes;
+use types::{Note, Tackable};
 
 /// Main entry point for the `show` subcommand.
 pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -48,7 +49,7 @@ fn show_notes(maybe_on: Option<&str>, tacked_dir: &PathBuf)
         notes_to_print = notes;
     }
     for note in notes_to_print {
-        note.print_note();
+        note.show();
     }
 
     Ok(())

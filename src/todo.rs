@@ -1,6 +1,8 @@
 //! This module contains functions for creating and saving a new note.
 
+use std::collections::hash_map::DefaultHasher;
 use std::error::Error;
+use std::hash::{Hash, Hasher};
 use std::io::{Read, Write};
 use std::fs::{File, OpenOptions};
 use std::path::{Path, PathBuf};
@@ -10,7 +12,36 @@ use clap;
 use serde_json;
 
 use init::find_tacked_notes;
-use types::Note;
+
+/// A `tack-it-on` note.
+#[derive(Clone, Debug, Hash, Serialize, Deserialize)]
+pub struct ToDo {
+    pub content: String,
+    pub on: Option<PathBuf>,
+    pub datetime: chrono::DateTime<chrono::Local>,
+}
+
+impl Note {
+    /// Creates an ID for a note by hashing the contents.
+    pub fn gen_id(&self) -> String {
+        let mut h = DefaultHasher::new();
+        self.hash(&mut h);
+
+        h.finish().to_string()
+    }
+
+    pub fn print_note(&self) {
+        let mut note_string: String = String::new();
+        // Header
+        note_string.push_str(&format!("[{}] {}\n", &self.gen_id()[..8], &self.datetime));
+        // Body
+        if let Some(ref on_file) = self.on {
+            note_string.push_str(&format!("On {}: ", on_file.display()));
+        }
+        note_string.push_str(&format!("{}\n", &self.content));
+        println!("{}", note_string);
+    }
+}
 
 /// Main entry point to the `note` subcommand. Creates a new note.
 pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
