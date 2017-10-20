@@ -15,7 +15,7 @@ pub trait Tackable : Hash {
         h.finish().to_string()
     }
 
-    fn show(&self);
+    fn show_string(&self) -> String;
 }
 
 /// A `tack-it-on` note.
@@ -27,7 +27,7 @@ pub struct Note {
 }
 
 impl Tackable for Note {
-    fn show(&self) {
+    fn show_string(&self) -> String {
         let mut note_string: String = String::new();
         // Header
         note_string.push_str(&format!("[{}] {}\n", &self.gen_id()[..8], &self.datetime));
@@ -36,6 +36,7 @@ impl Tackable for Note {
             note_string.push_str(&format!("On {}: ", on_file.display()));
         }
         note_string.push_str(&format!("{}\n", &self.content));
-        println!("{}", note_string);
+
+        note_string
     }
 }
