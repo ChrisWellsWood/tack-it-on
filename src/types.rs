@@ -4,9 +4,7 @@ use chrono;
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::path::{Path, PathBuf};
-
-use serde::{Serialize, Deserialize};
+use std::path::{PathBuf};
 
 /// A `tack-it-on` note.
 #[derive(Clone, Debug, Hash, Serialize, Deserialize)]

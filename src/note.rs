@@ -127,6 +127,9 @@ mod tests {
         let (notes_path, mut notes) = get_tacked(&tacked_path).unwrap();
         assert_eq!(notes_path, json_path);
         let note = notes.pop().unwrap();
-        assert_eq!(note.content, content);
+        let note_content = match note {
+            Tacked::Note{content, ..} => content,
+        };
+        assert_eq!(note_content, content);
     }
 }

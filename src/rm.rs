@@ -7,7 +7,6 @@ use clap;
 
 use init::find_tacked_notes;
 use note::{get_tacked, save_tacked};
-use types::Tacked;
 
 /// Main entry point to the `rm` subcommand.
 pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -64,9 +63,9 @@ mod tests {
         let content = String::from("This is a test note.");
         let maybe_on = None;
         create_note(content.clone(), maybe_on, &tacked_path).unwrap();
-        let (notes_path, mut notes) = get_tacked(&tacked_path).unwrap();
+        let (_, mut notes) = get_tacked(&tacked_path).unwrap();
         let note = notes.pop().unwrap();
-        remove_note(&note.gen_id(), &tacked_path).unwrap();
+        remove_tacked(&note.gen_id(), &tacked_path).unwrap();
         let (_, notes) = get_tacked(&tacked_path).unwrap();
         assert_eq!(notes.len(), 0);
     }
