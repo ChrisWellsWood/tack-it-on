@@ -6,8 +6,8 @@ use std::path::{Path, PathBuf};
 use clap;
 
 use init::find_tacked_notes;
-use note::get_notes;
-use types::{Note, Tackable};
+use note::get_tacked;
+use types::Tacked;
 
 /// Main entry point for the `show` subcommand.
 pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -27,8 +27,8 @@ pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 /// Shows all notes.
 fn show_notes(maybe_on: Option<&str>, tacked_dir: &PathBuf)
               -> Result<(), Box<Error>> {
-    let (_, notes) = get_notes(tacked_dir)?;
-    let notes_to_print: Vec<Note>;
+    let (_, notes) = get_tacked(tacked_dir)?;
+    let notes_to_print: Vec<Tacked>;
     if let Some(on) = maybe_on {
         let mut on = String::from(on);
         if on.ends_with("/") {
@@ -37,7 +37,7 @@ fn show_notes(maybe_on: Option<&str>, tacked_dir: &PathBuf)
         notes_to_print = notes
             .iter()
             .filter(|s| {
-                if let Some(ref on_path) = s.on {
+                if let &Some(ref on_path) = s.get_on() {
                     on == on_path.to_str().expect("Could not convert path to str.")
                 } else {
                     false

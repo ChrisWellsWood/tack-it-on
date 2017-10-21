@@ -10,7 +10,7 @@ use clap;
 use serde_json;
 
 use init::find_tacked_notes;
-use types::Note;
+use types::Tacked;
 
 /// Main entry point to the `note` subcommand. Creates a new note.
 pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -30,34 +30,35 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 /// Creates and stores a new note.
 pub fn create_note(content: String, maybe_on: Option<&str>, tacked_dir: &PathBuf)
                -> Result<(), Box<Error>> {
-    let (notes_path, mut notes) = get_notes(&tacked_dir)?;
+    let (notes_path, mut notes) = get_tacked(&tacked_dir)?;
     let maybe_short_on = short_on_path(maybe_on, tacked_dir)?;
-    let note = Note {
+    let note = Tacked::Note {
         content,
         on: maybe_short_on,
         datetime: chrono::Local::now(),
         };
     notes.push(note);
-    save_notes(&notes, &notes_path)?;
+    save_tacked(&notes, &notes_path)?;
 
     Ok(())
 }
 
 /// Gets all notes from `notes.json` in the `.tacked` folder.
-pub fn get_notes(tacked_dir: &PathBuf) -> Result<(PathBuf, Vec<Note>), Box<Error>> {
-    let notes: Vec<Note>;
-    let mut notes_path = tacked_dir.clone();
-    notes_path.push("notes.json");
-    if notes_path.exists() {
-        let mut notes_file = File::open(&notes_path)?;
-        let mut notes_string = String::new();
-        notes_file.read_to_string(&mut notes_string)?;
-        notes = serde_json::from_str(&notes_string)?;
+pub fn get_tacked(tacked_dir: &PathBuf)
+                  -> Result<(PathBuf, Vec<Tacked>), Box<Error>> {
+    let tacked: Vec<Tacked>;
+    let mut tacked_path = tacked_dir.clone();
+    tacked_path.push("notes.json");
+    if tacked_path.exists() {
+        let mut tacked_file = File::open(&tacked_path)?;
+        let mut tacked_string = String::new();
+        tacked_file.read_to_string(&mut tacked_string)?;
+        tacked = serde_json::from_str(&tacked_string)?;
     } else {
-        notes = Vec::new();
+        tacked = Vec::new();
     }
 
-    Ok((notes_path, notes))
+    Ok((tacked_path, tacked))
 }
 
 /// Returns the `--on` flag target path, relative to the `.tacked` directory.
@@ -93,7 +94,7 @@ fn short_on_path(maybe_on: Option<&str>, tacked_dir: &PathBuf)
 }
 
 /// Writes an updated `notes.json` file to the `.tacked` directory.
-pub fn save_notes(notes: &Vec<Note>, notes_path: &PathBuf)
+pub fn save_tacked(notes: &Vec<Tacked>, notes_path: &PathBuf)
                   -> Result<(), Box<Error>> {
     let notes_json = serde_json::to_string(notes)?;
     let mut buffer = OpenOptions::new()
@@ -123,7 +124,7 @@ mod tests {
         create_note(content.clone(), maybe_on, &tacked_path).unwrap();
         let json_path = tacked_path.join("notes.json");
         assert!(json_path.exists());
-        let (notes_path, mut notes) = get_notes(&tacked_path).unwrap();
+        let (notes_path, mut notes) = get_tacked(&tacked_path).unwrap();
         assert_eq!(notes_path, json_path);
         let note = notes.pop().unwrap();
         assert_eq!(note.content, content);

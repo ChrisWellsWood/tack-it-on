@@ -6,8 +6,8 @@ use std::path::{Path, PathBuf};
 use clap;
 
 use init::find_tacked_notes;
-use note::{get_notes, save_notes};
-use types::Tackable;
+use note::{get_tacked, save_tacked};
+use types::Tacked;
 
 /// Main entry point to the `rm` subcommand.
 pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -15,7 +15,7 @@ pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let maybe_tacked = find_tacked_notes(&cwd)?;
     if let Some(tacked_dir) = maybe_tacked {
         if let Some(id) = input.value_of("id") {
-            remove_note(id, &tacked_dir)?;
+            remove_tacked(id, &tacked_dir)?;
         }
     } else { 
         return Err(From::from(
@@ -26,9 +26,9 @@ pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 }
 
 /// Removes a note given a partial ID.
-fn remove_note(id: &str, tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
-    let (notes_path, mut notes) = get_notes(&tacked_dir)?;
-    let mut matching_ids: Vec<usize> = notes
+fn remove_tacked(id: &str, tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
+    let (tacked_path, mut tacked) = get_tacked(&tacked_dir)?;
+    let mut matching_ids: Vec<usize> = tacked
         .iter()
         .enumerate()
         .filter(|n| &n.1.gen_id()[..id.len()] == id)
@@ -40,10 +40,10 @@ fn remove_note(id: &str, tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
         _ => return Err(From::from("ID portion not unique, increase length.")),
     }
     if let Some(i) = matching_ids.pop() {
-        notes.remove(i);
-        println!("Removed note.");
+        tacked.remove(i);
+        println!("Removed tacked.");
     }
-    save_notes(&notes, &notes_path)?;
+    save_tacked(&tacked, &tacked_path)?;
 
     Ok(())
 }
@@ -64,10 +64,10 @@ mod tests {
         let content = String::from("This is a test note.");
         let maybe_on = None;
         create_note(content.clone(), maybe_on, &tacked_path).unwrap();
-        let (notes_path, mut notes) = get_notes(&tacked_path).unwrap();
+        let (notes_path, mut notes) = get_tacked(&tacked_path).unwrap();
         let note = notes.pop().unwrap();
         remove_note(&note.gen_id(), &tacked_path).unwrap();
-        let (_, notes) = get_notes(&tacked_path).unwrap();
+        let (_, notes) = get_tacked(&tacked_path).unwrap();
         assert_eq!(notes.len(), 0);
     }
 }
