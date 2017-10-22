@@ -49,7 +49,7 @@ fn show_notes(maybe_on: Option<&str>, tacked_dir: &PathBuf)
         notes_to_print = notes;
     }
     for note in notes_to_print {
-        println!("{}", note.show_string());
+        println!("{}", note.show());
     }
 
     Ok(())

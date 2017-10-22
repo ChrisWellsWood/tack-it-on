@@ -10,7 +10,7 @@ use clap;
 use serde_json;
 
 use init::find_tacked_notes;
-use types::Tacked;
+use types::{Tacked, Note};
 
 /// Main entry point to the `note` subcommand. Creates a new note.
 pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -32,12 +32,12 @@ pub fn create_note(content: String, maybe_on: Option<&str>, tacked_dir: &PathBuf
                -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_tacked(&tacked_dir)?;
     let maybe_short_on = short_on_path(maybe_on, tacked_dir)?;
-    let note = Tacked::Note {
+    let note = Note {
         content,
         on: maybe_short_on,
         datetime: chrono::Local::now(),
         };
-    notes.push(note);
+    notes.push(Tacked::Note(note));
     save_tacked(&notes, &notes_path)?;
 
     Ok(())

@@ -30,7 +30,7 @@ fn remove_tacked(id: &str, tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
     let mut matching_ids: Vec<usize> = tacked
         .iter()
         .enumerate()
-        .filter(|n| &n.1.gen_id()[..id.len()] == id)
+        .filter(|n| &n.1.get_id()[..id.len()] == id)
         .map(|(i, _)| i)
         .collect();
     match matching_ids.len() {
