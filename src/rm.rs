@@ -65,7 +65,7 @@ mod tests {
         create_note(content.clone(), maybe_on, &tacked_path).unwrap();
         let (_, mut notes) = get_tacked(&tacked_path).unwrap();
         let note = notes.pop().unwrap();
-        remove_tacked(&note.gen_id(), &tacked_path).unwrap();
+        remove_tacked(&note.get_id(), &tacked_path).unwrap();
         let (_, notes) = get_tacked(&tacked_path).unwrap();
         assert_eq!(notes.len(), 0);
     }
