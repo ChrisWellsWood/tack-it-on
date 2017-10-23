@@ -51,23 +51,23 @@ mod tests {
     use tempdir::TempDir;
 
     #[test]
-    fn create_and_get_note() {
+    fn create_and_get_todo() {
         let temp_dir = TempDir::new("create_test")
             .expect("Could not create temp directory.");
         let tacked_path = temp_dir.path().join(".tacked");
         fs::create_dir(tacked_path.clone()).unwrap();
-        let content = String::from("This is a test note.");
+        let content = String::from("This is a test to do item.");
         let maybe_on = None;
-        create_note(content.clone(), maybe_on, &tacked_path).unwrap();
+        create_todo(content.clone(), maybe_on, &tacked_path).unwrap();
         let json_path = tacked_path.join("notes.json");
         assert!(json_path.exists());
-        let (notes_path, mut notes) = get_tacked(&tacked_path).unwrap();
-        assert_eq!(notes_path, json_path);
-        let note = notes.pop().unwrap();
-        if let Tacked::Note(ref note) = note {
-            assert_eq!(note.content, content);
+        let (tacked_path, mut tacked_items) = get_tacked(&tacked_path).unwrap();
+        assert_eq!(tacked_path, json_path);
+        let tacked = tacked_items.pop().unwrap();
+        if let Tacked::ToDo(ref todo) = tacked {
+            assert_eq!(todo.content, content);
         } else {
-            panic!("Test expected a note but has received another Tacked variant.");
+            panic!("Test expected a to do item but has received another Tacked variant.");
         }
     }
 }
