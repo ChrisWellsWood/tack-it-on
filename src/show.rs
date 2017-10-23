@@ -7,7 +7,7 @@ use clap;
 
 use init::find_tacked_notes;
 use note::get_tacked;
-use types::Tacked;
+use tackables::Tacked;
 
 /// Main entry point for the `show` subcommand.
 pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {

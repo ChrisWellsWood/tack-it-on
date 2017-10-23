@@ -10,7 +10,7 @@ use clap;
 use serde_json;
 
 use init::find_tacked_notes;
-use types::{Tacked, Note};
+use tackables::{Tacked, Note};
 
 /// Main entry point to the `note` subcommand. Creates a new note.
 pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
