@@ -5,14 +5,13 @@ use std::path::{Path, PathBuf};
 
 use clap;
 
-use init::find_tacked_notes;
-use note::get_tacked;
+use tack_store::{find_tack_store, get_tacked};
 use tackables::Tacked;
 
 /// Main entry point for the `show` subcommand.
 pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let cwd = Path::new(".").canonicalize()?;
-    let maybe_tacked = find_tacked_notes(&cwd)?;
+    let maybe_tacked = find_tack_store(&cwd)?;
     if let Some(tacked_dir) = maybe_tacked {
         let maybe_on = input.value_of("on");
         show_notes(maybe_on, &tacked_dir)?;

@@ -17,6 +17,7 @@ mod note;
 mod show;
 mod rm;
 mod tackables;
+mod tack_store;
 
 /// Processes arguments and runs subcommands.
 pub fn run() -> Result<(), Box<Error>> {

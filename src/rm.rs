@@ -5,13 +5,12 @@ use std::path::{Path, PathBuf};
 
 use clap;
 
-use init::find_tacked_notes;
-use note::{get_tacked, save_tacked};
+use tack_store::{get_tacked, save_tacked, find_tack_store};
 
 /// Main entry point to the `rm` subcommand.
 pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let cwd = Path::new(".").canonicalize()?;
-    let maybe_tacked = find_tacked_notes(&cwd)?;
+    let maybe_tacked = find_tack_store(&cwd)?;
     if let Some(tacked_dir) = maybe_tacked {
         if let Some(id) = input.value_of("id") {
             remove_tacked(id, &tacked_dir)?;
