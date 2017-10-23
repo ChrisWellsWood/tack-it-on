@@ -15,7 +15,10 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let maybe_tacked = find_tack_store(&cwd)?;
 
     if let Some(mut tacked_dir) = maybe_tacked {
-        let content = String::from(input.value_of("CONTENT").unwrap());
+        let content = String::from(
+            input.value_of("CONTENT")
+                 .expect("CONTENT was not found in arguments.")
+                 );
         let maybe_on = input.value_of("on");
         create_note(content, maybe_on, &mut tacked_dir)
     } else { 

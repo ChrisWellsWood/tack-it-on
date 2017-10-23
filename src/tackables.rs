@@ -71,7 +71,7 @@ impl Tackable for Note {
         let mut note_string: String = String::new();
         // Header
         note_string.push_str(
-            &format!("[{}] {}\n", &self.gen_id()[..8], self.datetime));
+            &format!("({}) {}\n", &self.gen_id()[..8], self.datetime));
         // Body
         if let Some(ref on_file) = self.on {
             note_string.push_str(&format!("On {}: ", on_file.display()));
@@ -93,6 +93,7 @@ pub struct ToDo {
 impl Tackable for ToDo {
     fn show_simple(&self) -> String {
         let mut todo_string: String = String::new();
+        todo_string.push_str(&format!("({}) ", &self.gen_id()[..8]));
         if !self.complete {
             todo_string.push_str("[ ] ");
         } else {

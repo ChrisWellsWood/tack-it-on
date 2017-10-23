@@ -18,6 +18,7 @@ mod show;
 mod rm;
 mod tackables;
 mod tack_store;
+mod todo;
 
 /// Processes arguments and runs subcommands.
 pub fn run() -> Result<(), Box<Error>> {
@@ -33,6 +34,11 @@ pub fn run() -> Result<(), Box<Error>> {
 			(@arg CONTENT: +required "Note content, wrapped in \"\".")
 			(@arg on: --on +takes_value "Tack note onto file.")
         )
+        (@subcommand todo =>
+            (about: "Creates a new to do item.")
+			(@arg ITEM: +required "To do item, wrapped in \"\".")
+			(@arg on: --on +takes_value "Tack to do onto file.")
+        )
         (@subcommand show =>
             (about: "Show note.")
 			(@arg on: --on +takes_value "Show notes on file.")
@@ -46,6 +52,7 @@ pub fn run() -> Result<(), Box<Error>> {
     match cli_app.subcommand() {
         ("init", _) => init::run_init(),
         ("note", Some(sub_args)) => note::run_note(sub_args),
+        ("todo", Some(sub_args)) => todo::run_todo(sub_args),
         ("show", Some(sub_args)) => show::run_show(sub_args),
         ("rm", Some(sub_args)) => rm::run_rm(sub_args),
 		_ => Err(From::from(cli_app.usage())),
