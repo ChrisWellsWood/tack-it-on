@@ -1,13 +1,10 @@
 //! This module contains functions for creating and saving a new note.
 
 use std::error::Error;
-use std::io::{Read, Write};
-use std::fs::{File, OpenOptions};
 use std::path::{Path, PathBuf};
 
 use chrono;
 use clap;
-use serde_json;
 
 use tackables::{Tacked, Note};
 use tack_store::{find_tack_store, get_tacked, short_on_path, save_tacked};
