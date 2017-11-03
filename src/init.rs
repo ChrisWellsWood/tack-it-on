@@ -10,7 +10,7 @@ use glob::glob;
 
 /// Crawls up file tree to root looking for a `.tacked` directory.
 /// Initialises tack-it-on in the current directory.
-/// 
+///
 /// If a `.tacked` directory is found in a parent directory, the user will be
 /// asked if they wish to uses that directory to store notes or create a new
 /// one.
@@ -68,9 +68,9 @@ fn contains_notes(dir: &PathBuf) -> Option<PathBuf> {
     let glob_str = format!("{}/*", dir.to_str().unwrap());
     for entry in glob(&glob_str).expect("Failed to read glob pattern.") {
         if let Ok(path) = entry {
-           if path.ends_with(".tacked") {
-               return Some(path);
-           }
+            if path.ends_with(".tacked") {
+                return Some(path);
+            }
         }
     }
 
@@ -80,10 +80,15 @@ fn contains_notes(dir: &PathBuf) -> Option<PathBuf> {
 /// Queries if initialisation of project should continue.
 fn query_init(cwd: &PathBuf, tacked_loc: &PathBuf) -> Result<bool, String> {
     if cwd == tacked_loc {
-        return Err(String::from("Current directory already has notes tacked on."));
+        return Err(String::from(
+            "Current directory already has notes tacked on.",
+        ));
     }
     println!("Found tacked notes in parent directory {:?}", tacked_loc);
-    println!("Do you want to start a new project in {:?} anyway? y/n", cwd);
+    println!(
+        "Do you want to start a new project in {:?} anyway? y/n",
+        cwd
+    );
     let mut response: String;
     let mut opt_init: Option<bool>;
     loop {
@@ -116,8 +121,7 @@ mod tests {
 
     #[test]
     fn initialize_tackiton() {
-        let temp_dir = TempDir::new("init_test")
-            .expect("Could not create temp directory.");
+        let temp_dir = TempDir::new("init_test").expect("Could not create temp directory.");
         create_tacked(&temp_dir.path().to_owned()).unwrap();
         let tacked_path = temp_dir.path().join(".tacked");
         assert!(tacked_path.exists());
@@ -125,8 +129,7 @@ mod tests {
 
     #[test]
     fn check_dir_for_tacked() {
-        let temp_dir = TempDir::new("check_test")
-            .expect("Could not create temp directory.");
+        let temp_dir = TempDir::new("check_test").expect("Could not create temp directory.");
         let tacked_path = temp_dir.path().join(".tacked");
         fs::create_dir(tacked_path.clone()).unwrap();
         assert!(contains_notes(&temp_dir.path().to_owned()).is_some());
@@ -137,23 +140,19 @@ mod tests {
 
     #[test]
     fn find_tacked() {
-        let temp_dir = TempDir::new("find_tacked_test")
-            .expect("Could not create temp directory.");
+        let temp_dir = TempDir::new("find_tacked_test").expect("Could not create temp directory.");
         let project_path = temp_dir.path().join("project");
         fs::create_dir(project_path.clone()).unwrap();
         let tacked_path = project_path.join(".tacked");
         fs::create_dir(tacked_path.clone()).unwrap();
-        let deep_project_path = project_path
-            .join("level1")
-            .join("level2");
+        let deep_project_path = project_path.join("level1").join("level2");
         fs::create_dir_all(deep_project_path.clone()).unwrap();
         let red_herring_path = temp_dir
             .path()
             .join("not_project")
             .join("still_not_project");
         fs::create_dir_all(red_herring_path.clone()).unwrap();
-        let tacked_maybe = find_tacked_notes(
-            &deep_project_path.to_owned()).unwrap();
+        let tacked_maybe = find_tacked_notes(&deep_project_path.to_owned()).unwrap();
         assert!(tacked_maybe.is_some());
         if let Some(tp) = tacked_maybe {
             assert!(tp == tacked_path);

@@ -52,22 +52,26 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
         let content = String::from(input.value_of("CONTENT").unwrap());
         let maybe_on = input.value_of("on");
         create_note(content, maybe_on, &mut tacked_dir)
-    } else { 
+    } else {
         Err(From::from(
-                "No `.tacked` directory found. Run `init` before adding notes."))
+            "No `.tacked` directory found. Run `init` before adding notes.",
+        ))
     }
 }
 
 /// Creates and stores a new note.
-pub fn create_note(content: String, maybe_on: Option<&str>, tacked_dir: &PathBuf)
-               -> Result<(), Box<Error>> {
+pub fn create_note(
+    content: String,
+    maybe_on: Option<&str>,
+    tacked_dir: &PathBuf,
+) -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
     let maybe_short_on = short_on_path(maybe_on, tacked_dir)?;
     let note = Note {
         content,
         on: maybe_short_on,
         datetime: chrono::Local::now(),
-        };
+    };
     notes.push(note);
     save_notes(&notes, &notes_path)?;
 
@@ -92,16 +96,16 @@ pub fn get_notes(tacked_dir: &PathBuf) -> Result<(PathBuf, Vec<Note>), Box<Error
 }
 
 /// Returns the `--on` flag target path, relative to the `.tacked` directory.
-fn short_on_path(maybe_on: Option<&str>, tacked_dir: &PathBuf)
-                 -> Result<Option<PathBuf>, Box<Error>> {
+fn short_on_path(
+    maybe_on: Option<&str>,
+    tacked_dir: &PathBuf,
+) -> Result<Option<PathBuf>, Box<Error>> {
     let mut maybe_short_on = None;
     if let Some(on_string) = maybe_on {
         let on_path = Path::new(on_string)
             .canonicalize()
             .expect(&format!("Could not find '{}'.", on_string));
-        let tacked_parent = tacked_dir
-            .parent()
-            .expect("`.tacked` has no parent dir.");
+        let tacked_parent = tacked_dir.parent().expect("`.tacked` has no parent dir.");
         let mut path_after_tacked = PathBuf::new();
         let mut post_tacked = false;
         for component in on_path.components() {
@@ -113,25 +117,25 @@ fn short_on_path(maybe_on: Option<&str>, tacked_dir: &PathBuf)
             }
         }
         if !post_tacked {
-            return Err(From::from(
-                           format!("{} is outside of the tack-it-on project.",
-                                   on_path.display())));
+            return Err(From::from(format!(
+                "{} is outside of the tack-it-on project.",
+                on_path.display()
+            )));
         }
-        maybe_short_on  = Some(path_after_tacked);
+        maybe_short_on = Some(path_after_tacked);
     }
 
     Ok(maybe_short_on)
 }
 
 /// Writes an updated `notes.json` file to the `.tacked` directory.
-pub fn save_notes(notes: &Vec<Note>, notes_path: &PathBuf)
-                  -> Result<(), Box<Error>> {
+pub fn save_notes(notes: &Vec<Note>, notes_path: &PathBuf) -> Result<(), Box<Error>> {
     let notes_json = serde_json::to_string(notes)?;
     let mut buffer = OpenOptions::new()
-                      .write(true)
-                      .truncate(true)
-                      .create(true)
-                      .open(notes_path)?;
+        .write(true)
+        .truncate(true)
+        .create(true)
+        .open(notes_path)?;
     buffer.write(&notes_json.into_bytes())?;
 
     Ok(())
@@ -145,8 +149,7 @@ mod tests {
 
     #[test]
     fn create_and_get_note() {
-        let temp_dir = TempDir::new("create_test")
-            .expect("Could not create temp directory.");
+        let temp_dir = TempDir::new("create_test").expect("Could not create temp directory.");
         let tacked_path = temp_dir.path().join(".tacked");
         fs::create_dir(tacked_path.clone()).unwrap();
         let content = String::from("This is a test note.");

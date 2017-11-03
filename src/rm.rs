@@ -16,9 +16,10 @@ pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
         if let Some(id) = input.value_of("id") {
             remove_note(id, &tacked_dir)?;
         }
-    } else { 
+    } else {
         return Err(From::from(
-            "No `.tacked` directory found. Run `init` to add notes."));
+            "No `.tacked` directory found. Run `init` to add notes.",
+        ));
     }
 
     Ok(())
@@ -56,8 +57,7 @@ mod tests {
 
     #[test]
     fn rm_note() {
-        let temp_dir = TempDir::new("rm_test")
-            .expect("Could not create temp directory.");
+        let temp_dir = TempDir::new("rm_test").expect("Could not create temp directory.");
         let tacked_path = temp_dir.path().join(".tacked");
         fs::create_dir(tacked_path.clone()).unwrap();
         let content = String::from("This is a test note.");

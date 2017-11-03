@@ -1,8 +1,11 @@
 //! Core functionality of `tack-it-on`, a project centric note taking app.
 
-#[macro_use] extern crate clap;
-#[macro_use] extern crate serde_derive;
-#[macro_use] extern crate text_io;
+#[macro_use]
+extern crate clap;
+#[macro_use]
+extern crate serde_derive;
+#[macro_use]
+extern crate text_io;
 
 extern crate chrono;
 extern crate glob;
@@ -19,7 +22,7 @@ mod rm;
 
 /// Processes arguments and runs subcommands.
 pub fn run() -> Result<(), Box<Error>> {
-	let cli_app = clap_app!(myapp =>
+    let cli_app = clap_app!(myapp =>
         (version: "0.1.0")
         (author: "Chris Wells Wood <cwwoodesq@gmail.com>")
         (about: "A project centric note-taking application.")
@@ -46,6 +49,6 @@ pub fn run() -> Result<(), Box<Error>> {
         ("note", Some(sub_args)) => note::run_note(sub_args),
         ("show", Some(sub_args)) => show::run_show(sub_args),
         ("rm", Some(sub_args)) => rm::run_rm(sub_args),
-		_ => Err(From::from(cli_app.usage())),
+        _ => Err(From::from(cli_app.usage())),
     }
 }
