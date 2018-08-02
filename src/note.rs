@@ -2,9 +2,9 @@
 
 use std::collections::hash_map::DefaultHasher;
 use std::error::Error;
+use std::fs::{File, OpenOptions};
 use std::hash::{Hash, Hasher};
 use std::io::{Read, Write};
-use std::fs::{File, OpenOptions};
 use std::path::{Path, PathBuf};
 
 use chrono;
@@ -110,9 +110,9 @@ fn short_on_path(
         let mut post_tacked = false;
         for component in on_path.components() {
             if post_tacked {
-                path_after_tacked.push(component.as_ref());
+                path_after_tacked.push(component);
             }
-            if tacked_parent.ends_with(component.as_ref()) {
+            if tacked_parent.ends_with(component) {
                 post_tacked = true;
             }
         }
