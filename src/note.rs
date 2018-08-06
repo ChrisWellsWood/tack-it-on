@@ -1,19 +1,21 @@
 //! This module contains functions for creating and saving a new note.
 
-use std::collections::hash_map::DefaultHasher;
-use std::error::Error;
-use std::fs::{File, OpenOptions};
-use std::hash::{Hash, Hasher};
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
-
+/// A `tack-it-on` note.,
 use chrono;
 use clap;
 use serde_json;
+use std::collections::hash_map::DefaultHasher;
+use std::env;
+use std::error::Error;
+use std::fs::{File, OpenOptions};
+use std::hash::{Hash, Hasher};
+use std::io::{Read, Seek, SeekFrom, Write};
+use std::path::{Path, PathBuf};
+use subprocess::Exec;
+use tempfile::NamedTempFile;
 
 use init::find_tacked_notes;
 
-/// A `tack-it-on` note.
 #[derive(Clone, Debug, Hash, Serialize, Deserialize)]
 pub struct Note {
     pub content: String,
@@ -49,14 +51,32 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let maybe_tacked = find_tacked_notes(&cwd)?;
 
     if let Some(mut tacked_dir) = maybe_tacked {
-        let content = String::from(input.value_of("CONTENT").unwrap());
         let maybe_on = input.value_of("on");
-        create_note(content, maybe_on, &mut tacked_dir)
+        let note = match input.value_of("note") {
+            Some(content) => String::from(content),
+            None => get_content_from_editor()?,
+        };
+        create_note(note, maybe_on, &mut tacked_dir)
     } else {
         Err(From::from(
             "No `.tacked` directory found. Run `init` before adding notes.",
         ))
     }
+}
+
+/// Collects note contents from editor.
+fn get_content_from_editor() -> Result<String, Box<Error>> {
+    let editor = match env::vars().find(|(key, _)| key == "EDITOR") {
+        Some((_, val)) => val,
+        None => String::from("vi"),
+    };
+    let tmpfile = NamedTempFile::new()?;
+    Exec::cmd(editor).arg(tmpfile.path()).join()?;
+    let mut file = tmpfile.as_file();
+    file.seek(SeekFrom::Start(0)).unwrap();
+    let mut buf = String::new();
+    file.read_to_string(&mut buf).unwrap();
+    Ok(String::from(buf))
 }
 
 /// Creates and stores a new note.

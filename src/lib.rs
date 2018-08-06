@@ -11,14 +11,16 @@ extern crate chrono;
 extern crate glob;
 extern crate serde;
 extern crate serde_json;
+extern crate subprocess;
 extern crate tempdir;
+extern crate tempfile;
 
 use std::error::Error;
 
 mod init;
 mod note;
-mod show;
 mod rm;
+mod show;
 
 /// Processes arguments and runs subcommands.
 pub fn run() -> Result<(), Box<Error>> {
@@ -31,7 +33,7 @@ pub fn run() -> Result<(), Box<Error>> {
         )
         (@subcommand note =>
             (about: "Creates a new note.")
-			(@arg CONTENT: +required "Note content, wrapped in \"\".")
+			(@arg note: -m +takes_value "Note content, wrapped in \"\".")
 			(@arg on: --on +takes_value "Tack note onto file.")
         )
         (@subcommand show =>
