@@ -42,7 +42,7 @@ impl Note {
         ));
         // Body
         if let Some(ref on_file) = self.on {
-            note_string.push_str(&format!("On {}: ", on_file.display()));
+            note_string.push_str(&format!("On `{}`: ", on_file.display()));
         }
         note_string.push_str(&format!("{}\n", &self.content));
         println!("{}", note_string);
