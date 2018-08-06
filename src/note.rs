@@ -35,7 +35,11 @@ impl Note {
     pub fn print_note(&self) {
         let mut note_string: String = String::new();
         // Header
-        note_string.push_str(&format!("[{}] {}\n", &self.gen_id()[..8], &self.datetime));
+        note_string.push_str(&format!(
+            "[{}] {}\n",
+            &self.gen_id()[..8],
+            &self.datetime.format("%Y-%m-%d %H:%M:%S").to_string()
+        ));
         // Body
         if let Some(ref on_file) = self.on {
             note_string.push_str(&format!("On {}: ", on_file.display()));
