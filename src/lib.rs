@@ -33,16 +33,17 @@ pub fn run() -> Result<(), Box<Error>> {
         )
         (@subcommand note =>
             (about: "Creates a new note.")
-			(@arg note: -m +takes_value "Note content, wrapped in \"\".")
-			(@arg on: --on +takes_value "Tack note onto file.")
+                (@arg note: -m +takes_value "Note content, wrapped in \"\".")
+                (@arg on: --on +takes_value "Tack note onto file.")
         )
         (@subcommand show =>
             (about: "Show note.")
-			(@arg on: --on +takes_value "Show notes on file.")
+                (@arg on: --on +takes_value "Show notes on file.")
+                (@arg oneline: --oneline "Prints concise version of the note.")
         )
         (@subcommand rm =>
             (about: "Remove note.")
-			(@arg id: -i --id +takes_value "Removes note with matching ID.")
+                (@arg id: -i --id +takes_value "Removes note with matching ID.")
         )
     ).get_matches();
 

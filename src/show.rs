@@ -14,7 +14,8 @@ pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     let maybe_tacked = find_tacked_notes(&cwd)?;
     if let Some(tacked_dir) = maybe_tacked {
         let maybe_on = input.value_of("on");
-        show_notes(maybe_on, &tacked_dir)?;
+        let oneline = input.is_present("oneline");
+        show_notes(maybe_on, oneline, &tacked_dir)?;
     } else {
         return Err(From::from(
             "No `.tacked` directory found. Run `init` before adding notes.",
@@ -25,7 +26,11 @@ pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 }
 
 /// Shows all notes.
-fn show_notes(maybe_on: Option<&str>, tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
+fn show_notes(
+    maybe_on: Option<&str>,
+    oneline: bool,
+    tacked_dir: &PathBuf,
+) -> Result<(), Box<Error>> {
     let (_, notes) = get_notes(tacked_dir)?;
     let notes_to_print: Vec<Note>;
     if let Some(on) = maybe_on {
@@ -35,10 +40,12 @@ fn show_notes(maybe_on: Option<&str>, tacked_dir: &PathBuf) -> Result<(), Box<Er
         }
         notes_to_print = notes
             .iter()
-            .filter(|s| if let Some(ref on_path) = s.on {
-                on == on_path.to_str().expect("Could not convert path to str.")
-            } else {
-                false
+            .filter(|s| {
+                if let Some(ref on_path) = s.on {
+                    on == on_path.to_str().expect("Could not convert path to str.")
+                } else {
+                    false
+                }
             })
             .cloned()
             .collect();
@@ -46,7 +53,11 @@ fn show_notes(maybe_on: Option<&str>, tacked_dir: &PathBuf) -> Result<(), Box<Er
         notes_to_print = notes;
     }
     for note in notes_to_print {
-        note.print_note();
+        if !oneline {
+            note.print_note();
+        } else {
+            note.print_oneline();
+        }
     }
 
     Ok(())

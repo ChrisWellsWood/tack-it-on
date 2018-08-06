@@ -43,6 +43,19 @@ impl Note {
         note_string.push_str(&format!("{}\n", &self.content));
         println!("{}", note_string);
     }
+
+    pub fn print_oneline(&self) {
+        let mut note_string: String = String::new();
+        // Header
+        note_string.push_str(&format!("[{}] ", &self.gen_id()[..8]));
+        note_string.push_str(&format!(
+            "{}",
+            &self.content.split('\n').collect::<Vec<&str>>()[0]
+        ));
+        note_string.truncate(76);
+        note_string.push_str(&format!("..."));
+        println!("{}", note_string);
+    }
 }
 
 /// Main entry point to the `note` subcommand. Creates a new note.
