@@ -69,7 +69,11 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
             Some(content) => String::from(content),
             None => get_content_from_editor()?,
         };
-        create_note(note, maybe_on, &mut tacked_dir)
+        if note.split_whitespace().collect::<Vec<&str>>().len() > 0 {
+            create_note(note, maybe_on, &mut tacked_dir)
+        } else {
+            Err(From::from("Note has no content. Aborting."))
+        }
     } else {
         Err(From::from(
             "No `.tacked` directory found. Run `init` before adding notes.",
