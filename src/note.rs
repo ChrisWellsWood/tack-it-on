@@ -18,6 +18,7 @@ use init::find_tacked_notes;
 
 #[derive(Clone, Debug, Hash, Serialize, Deserialize)]
 pub struct Note {
+    pub user: Option<String>,
     pub content: String,
     pub on: Option<PathBuf>,
     pub datetime: chrono::DateTime<chrono::Local>,
@@ -35,12 +36,21 @@ impl Note {
     pub fn print_note(&self) {
         let mut note_string: String = String::new();
         // Header
-        note_string.push_str(&format!("[{}] {}\n", &self.gen_id()[..8], &self.datetime));
+        if let Some(ref username) = self.user {
+            note_string.push_str(&format!(
+                "[{}] {} {}\n",
+                &self.gen_id()[..8],
+                username,
+                &self.datetime
+            ));
+        } else {
+            note_string.push_str(&format!("[{}] {}\n", &self.gen_id()[..8], &self.datetime));
+        }
         // Body
         if let Some(ref on_file) = self.on {
-            note_string.push_str(&format!("On {}: ", on_file.display()));
+            note_string.push_str(&format!("On: {}\n", on_file.display()));
         }
-        note_string.push_str(&format!("{}\n", &self.content));
+        note_string.push_str(&format!("{}", &self.content));
         println!("{}", note_string);
     }
 
@@ -103,8 +113,10 @@ pub fn create_note(
     tacked_dir: &PathBuf,
 ) -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
+    let user = env::vars().find(|(key, _)| key == "USER").map(|x| x.1);
     let maybe_short_on = short_on_path(maybe_on, tacked_dir)?;
     let note = Note {
+        user,
         content,
         on: maybe_short_on,
         datetime: chrono::Local::now(),
