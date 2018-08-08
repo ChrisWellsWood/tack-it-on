@@ -28,18 +28,26 @@ pub fn run_rm(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 /// Removes a note given a partial ID.
 fn remove_note(id: &str, tacked_dir: &PathBuf) -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
-    let mut matching_ids: Vec<usize> = notes
-        .iter()
+    let note_ids: Vec<String> = notes.iter().map(|n| n.gen_id()).collect();
+    let (mut matching_indices, mut matching_ids): (Vec<usize>, Vec<String>) = note_ids
+        .into_iter()
         .enumerate()
-        .filter(|n| &n.1.gen_id()[..id.len()] == id)
-        .map(|(i, _)| i)
-        .collect();
+        .filter(|(_, r)| &r[..id.len()] == id)
+        .unzip();
+    for id_string in matching_ids.iter_mut() {
+        id_string.truncate(8);
+    }
     match matching_ids.len() {
         0 => return Err(From::from("No notes matching that ID.")),
         1 => (),
-        _ => return Err(From::from("ID portion not unique, increase length.")),
+        _ => {
+            return Err(From::from(format!(
+                "ID portion not unique, increase length. Could be:\n    {}",
+                matching_ids.join("\n    ")
+            )))
+        }
     }
-    if let Some(i) = matching_ids.pop() {
+    if let Some(i) = matching_indices.pop() {
         notes.remove(i);
         println!("Removed note.");
     }
