@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use clap;
 
 use init::find_tacked_notes;
-use note::{get_notes, Note};
+use note::get_notes;
 
 /// Main entry point for the `show` subcommand.
 pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
@@ -15,7 +15,8 @@ pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     if let Some(tacked_dir) = maybe_tacked {
         let maybe_on = input.value_of("on");
         let oneline = input.is_present("oneline");
-        show_notes(maybe_on, oneline, &tacked_dir)?;
+        let todo = input.is_present("todo");
+        show_notes(maybe_on, oneline, todo, &tacked_dir)?;
     } else {
         return Err(From::from(
             "No `.tacked` directory found. Run `init` before adding notes.",
@@ -29,16 +30,16 @@ pub fn run_show(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 fn show_notes(
     maybe_on: Option<&str>,
     oneline: bool,
+    todo: bool,
     tacked_dir: &PathBuf,
 ) -> Result<(), Box<Error>> {
     let (_, notes) = get_notes(tacked_dir)?;
-    let notes_to_print: Vec<Note>;
-    if let Some(on) = maybe_on {
+    let notes_to_print = if let Some(on) = maybe_on {
         let mut on = String::from(on);
         if on.ends_with("/") {
             on.pop();
         }
-        notes_to_print = notes
+        notes
             .iter()
             .filter(|s| {
                 if let Some(ref on_path) = s.on {
@@ -48,17 +49,25 @@ fn show_notes(
                 }
             })
             .cloned()
-            .collect();
+            .collect()
     } else {
-        notes_to_print = notes;
-    }
-    for note in notes_to_print {
-        if !oneline {
-            note.print_note();
-        } else {
-            note.print_oneline();
-        }
-    }
+        notes
+    };
+    let notes_strings: Vec<String> = if todo {
+        let mut todos: Vec<(&i8, String)> = notes_to_print
+            .iter()
+            .map(|x| x.todo_item())
+            .filter(|x| x.is_some())
+            .map(|x| x.unwrap())
+            .collect();
+        todos.sort_unstable_by(|(p, _), (q, _)| q.cmp(p));
+        todos.into_iter().map(|x| x.1).collect()
+    } else if oneline {
+        notes_to_print.iter().map(|x| x.oneliner()).collect()
+    } else {
+        notes_to_print.iter().map(|x| x.full_note()).collect()
+    };
+    println!("{}", notes_strings.join("\n"));
 
     Ok(())
 }
@@ -77,7 +86,8 @@ mod tests {
         fs::create_dir(tacked_path.clone()).unwrap();
         let content = String::from("This is a test note.");
         let maybe_on = None;
+        let todo = false;
         create_note(content.clone(), maybe_on, &tacked_path).unwrap();
-        show_notes(maybe_on, &tacked_path).unwrap();
+        show_notes(maybe_on, todo, &tacked_path).unwrap();
     }
 }

@@ -45,6 +45,7 @@ pub fn run() -> Result<(), Box<Error>> {
             (about: "Show note.")
                 (@arg on: -o --on +takes_value "Show notes on file.")
                 (@arg oneline: -l --oneline "Prints concise version of the note.")
+                (@arg todo: -t --todo "Shows to do list.")
         )
         (@subcommand rm =>
             (about: "Remove note.")

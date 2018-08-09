@@ -21,7 +21,7 @@ pub struct Note {
     pub user: Option<String>,
     pub content: String,
     pub on: Option<PathBuf>,
-    pub todo: Option<i8>,
+    pub todo: Option<(i8, bool)>,
     pub datetime: chrono::DateTime<chrono::Local>,
 }
 
@@ -34,39 +34,63 @@ impl Note {
         h.finish().to_string()
     }
 
-    pub fn print_note(&self) {
+    pub fn full_note(&self) -> String {
         let mut note_string: String = String::new();
         // Header
         let date_string = &self.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
+        let todo_info = match self.todo {
+            Some((priority, _)) => format!("TO DO p{}", priority),
+            None => String::from(""),
+        };
         if let Some(ref username) = self.user {
             note_string.push_str(&format!(
-                "[{}] {} {}\n",
+                "({}) {} {} {}\n",
                 &self.gen_id()[..8],
+                todo_info,
                 username,
                 date_string
             ));
         } else {
-            note_string.push_str(&format!("[{}] {}\n", &self.gen_id()[..8], date_string));
+            note_string.push_str(&format!("({}) {}\n", &self.gen_id()[..8], date_string));
         }
         // Body
         if let Some(ref on_file) = self.on {
             note_string.push_str(&format!("On: {}\n", on_file.display()));
         }
         note_string.push_str(&format!("{}", &self.content));
-        println!("{}", note_string);
+        note_string
     }
 
-    pub fn print_oneline(&self) {
+    pub fn oneliner(&self) -> String {
         let mut note_string: String = String::new();
         // Header
-        note_string.push_str(&format!("[{}] ", &self.gen_id()[..8]));
+        note_string.push_str(&format!("({}) ", &self.gen_id()[..8]));
         note_string.push_str(&format!(
             "{}",
             &self.content.split('\n').collect::<Vec<&str>>()[0]
         ));
         note_string.truncate(76);
         note_string.push_str(&format!("..."));
-        println!("{}", note_string);
+        note_string
+    }
+
+    pub fn todo_item(&self) -> Option<(&i8, String)> {
+        match &self.todo {
+            Some((priority, complete)) => {
+                let mut note_string: String = String::new();
+                let status_string = if *complete { "V" } else { " " };
+                // Header
+                note_string.push_str(&format!("[{}] ({}) ", status_string, &self.gen_id()[..8]));
+                note_string.push_str(&format!(
+                    "{}",
+                    &self.content.split('\n').collect::<Vec<&str>>()[0]
+                ));
+                note_string.truncate(76);
+                note_string.push_str(&format!("..."));
+                Some((priority, note_string))
+            }
+            None => None,
+        }
     }
 }
 
@@ -77,7 +101,7 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 
     if let Some(mut tacked_dir) = maybe_tacked {
         let maybe_on = input.value_of("on");
-        let maybe_todo: Option<i8> = if input.is_present("todo") {
+        let maybe_todo: Option<(i8, bool)> = if input.is_present("todo") {
             if input.is_present("priority") {
                 let priority = input
                     .value_of("priority")
@@ -90,7 +114,7 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
                             <i8>::max_value()
                         )
                     })?;
-                Some(priority)
+                Some((priority, false))
             } else {
                 None
             }
@@ -132,7 +156,7 @@ fn get_content_from_editor() -> Result<String, Box<Error>> {
 pub fn create_note(
     content: String,
     maybe_on: Option<&str>,
-    maybe_todo: Option<i8>,
+    maybe_todo: Option<(i8, bool)>,
     tacked_dir: &PathBuf,
 ) -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
