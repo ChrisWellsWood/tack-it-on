@@ -34,12 +34,12 @@ pub fn run() -> Result<(), Box<Error>> {
         (@subcommand note =>
             (about: "Creates a new note.")
                 (@arg note: -m +takes_value "Note content, wrapped in \"\".")
-                (@arg on: --on +takes_value "Tack note onto file.")
+                (@arg on: -o --on +takes_value "Tack note onto file.")
         )
         (@subcommand show =>
             (about: "Show note.")
-                (@arg on: --on +takes_value "Show notes on file.")
-                (@arg oneline: --oneline "Prints concise version of the note.")
+                (@arg on: -o --on +takes_value "Show notes on file.")
+                (@arg oneline: -l --oneline "Prints concise version of the note.")
         )
         (@subcommand rm =>
             (about: "Remove note.")
