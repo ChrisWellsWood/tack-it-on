@@ -21,6 +21,7 @@ pub struct Note {
     pub user: Option<String>,
     pub content: String,
     pub on: Option<PathBuf>,
+    pub todo: Option<i8>,
     pub datetime: chrono::DateTime<chrono::Local>,
 }
 
@@ -76,12 +77,32 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
 
     if let Some(mut tacked_dir) = maybe_tacked {
         let maybe_on = input.value_of("on");
+        let maybe_todo: Option<i8> = if input.is_present("todo") {
+            if input.is_present("priority") {
+                let priority = input
+                    .value_of("priority")
+                    .unwrap_or("3")
+                    .parse::<i8>()
+                    .map_err(|_| {
+                        format!(
+                            "Priority outside possible range of {} to {}.",
+                            <i8>::min_value(),
+                            <i8>::max_value()
+                        )
+                    })?;
+                Some(priority)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
         let note = match input.value_of("note") {
             Some(content) => String::from(content),
             None => get_content_from_editor()?,
         };
         if note.split_whitespace().collect::<Vec<&str>>().len() > 0 {
-            create_note(note, maybe_on, &mut tacked_dir)
+            create_note(note, maybe_on, maybe_todo, &mut tacked_dir)
         } else {
             Err(From::from("Note has no content. Aborting."))
         }
@@ -111,6 +132,7 @@ fn get_content_from_editor() -> Result<String, Box<Error>> {
 pub fn create_note(
     content: String,
     maybe_on: Option<&str>,
+    maybe_todo: Option<i8>,
     tacked_dir: &PathBuf,
 ) -> Result<(), Box<Error>> {
     let (notes_path, mut notes) = get_notes(&tacked_dir)?;
@@ -120,6 +142,7 @@ pub fn create_note(
         user,
         content,
         on: maybe_short_on,
+        todo: maybe_todo,
         datetime: chrono::Local::now(),
     };
     notes.push(note);

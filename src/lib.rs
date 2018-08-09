@@ -35,6 +35,11 @@ pub fn run() -> Result<(), Box<Error>> {
             (about: "Creates a new note.")
                 (@arg note: -m +takes_value "Note content, wrapped in \"\".")
                 (@arg on: -o --on +takes_value "Tack note onto file.")
+                (@arg todo: -t --todo "Sets note as a to do item. You can set \
+                                       a priority with `-p`. Default priority \
+                                       is 3")
+                (@arg priority: -p --priority +takes_value
+                 "Sets priority of to do item.")
         )
         (@subcommand show =>
             (about: "Show note.")
