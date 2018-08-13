@@ -38,22 +38,24 @@ impl Note {
         let mut note_string: String = String::new();
         // Header
         let date_string = &self.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
-        let todo_info = match self.todo {
-            Some((priority, _)) => format!("TO DO p{}", priority),
-            None => String::from(""),
-        };
         if let Some(ref username) = self.user {
             note_string.push_str(&format!(
-                "({}) {} {} {}\n",
+                "[{}] {} {}\n",
                 &self.gen_id()[..8],
-                todo_info,
                 username,
                 date_string
             ));
         } else {
-            note_string.push_str(&format!("({}) {}\n", &self.gen_id()[..8], date_string));
+            note_string.push_str(&format!("[{}] {}\n", &self.gen_id()[..8], date_string));
         }
         // Body
+        if let Some((priority, complete)) = self.todo {
+            let status_string = if complete { "☑" } else { "☐" };
+            note_string.push_str(&format!(
+                "TODO: Priority {} | Status {}\n",
+                priority, status_string
+            ));
+        }
         if let Some(ref on_file) = self.on {
             note_string.push_str(&format!("On: {}\n", on_file.display()));
         }
@@ -64,7 +66,7 @@ impl Note {
     pub fn oneliner(&self) -> String {
         let mut note_string: String = String::new();
         // Header
-        note_string.push_str(&format!("({}) ", &self.gen_id()[..8]));
+        note_string.push_str(&format!("[{}] ", &self.gen_id()[..8]));
         note_string.push_str(&format!(
             "{}",
             &self.content.split('\n').collect::<Vec<&str>>()[0]
@@ -78,15 +80,22 @@ impl Note {
         match &self.todo {
             Some((priority, complete)) => {
                 let mut note_string: String = String::new();
-                let status_string = if *complete { "V" } else { " " };
+                let status_string = if *complete { "☑" } else { "☐" };
                 // Header
-                note_string.push_str(&format!("[{}] ({}) ", status_string, &self.gen_id()[..8]));
+                note_string.push_str(&format!(
+                    "{} [{}] (P{}) ",
+                    status_string,
+                    &self.gen_id()[..8],
+                    priority,
+                ));
                 note_string.push_str(&format!(
                     "{}",
                     &self.content.split('\n').collect::<Vec<&str>>()[0]
                 ));
-                note_string.truncate(76);
-                note_string.push_str(&format!("..."));
+                if note_string.len() > 79 {
+                    note_string.truncate(76);
+                    note_string.push_str(&format!("..."));
+                }
                 Some((priority, note_string))
             }
             None => None,
@@ -102,22 +111,17 @@ pub fn run_note(input: &clap::ArgMatches) -> Result<(), Box<Error>> {
     if let Some(mut tacked_dir) = maybe_tacked {
         let maybe_on = input.value_of("on");
         let maybe_todo: Option<(i8, bool)> = if input.is_present("todo") {
-            if input.is_present("priority") {
-                let priority = input
-                    .value_of("priority")
-                    .unwrap_or("3")
-                    .parse::<i8>()
-                    .map_err(|_| {
-                        format!(
-                            "Priority outside possible range of {} to {}.",
-                            <i8>::min_value(),
-                            <i8>::max_value()
-                        )
-                    })?;
-                Some((priority, false))
-            } else {
-                None
-            }
+            let priority = match input.value_of("priority") {
+                Some(priority_str) => priority_str.parse::<i8>().map_err(|_| {
+                    format!(
+                        "Priority outside possible range of {} to {}.",
+                        <i8>::min_value(),
+                        <i8>::max_value()
+                    )
+                })?,
+                None => 3,
+            };
+            Some((priority, false))
         } else {
             None
         };
@@ -251,7 +255,8 @@ mod tests {
         fs::create_dir(tacked_path.clone()).unwrap();
         let content = String::from("This is a test note.");
         let maybe_on = None;
-        create_note(content.clone(), maybe_on, &tacked_path).unwrap();
+        let maybe_todo = None;
+        create_note(content.clone(), maybe_on, maybe_todo, &tacked_path).unwrap();
         let json_path = tacked_path.join("notes.json");
         assert!(json_path.exists());
         let (notes_path, mut notes) = get_notes(&tacked_path).unwrap();
