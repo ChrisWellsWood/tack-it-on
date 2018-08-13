@@ -14,13 +14,44 @@ extern crate serde_json;
 extern crate subprocess;
 extern crate tempdir;
 extern crate tempfile;
+extern crate toml;
 
+use std::env;
 use std::error::Error;
+use std::fs::File;
+use std::io::Read;
+use std::path::PathBuf;
 
 mod init;
 mod note;
 mod rm;
 mod show;
+
+#[derive(Debug, Default, Deserialize)]
+struct Config {
+    email: Option<String>,
+}
+
+impl Config {
+    fn from_config_file() -> Result<Config, Box<Error>> {
+        match env::vars().find(|(key, _)| key == "HOME") {
+            Some((_, home_path)) => {
+                let config_path: PathBuf = [&home_path, ".config", "tack-it-on", "config.toml"]
+                    .iter()
+                    .collect();
+                let mut config_file = File::open(&config_path)
+                    .map_err(|_| format!("{:?} does not exist, create config file.", config_path))?;
+                let mut config_string = String::new();
+                config_file.read_to_string(&mut config_string)?;
+                Ok(toml::from_str(&config_string)?)
+            }
+            None => Err(From::from(
+                "Cannot find home directory, so cannot load config. Make sure the HOME
+                 environmental variable is set.",
+            )),
+        }
+    }
+}
 
 /// Processes arguments and runs subcommands.
 pub fn run() -> Result<(), Box<Error>> {
